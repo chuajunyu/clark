@@ -19,6 +19,84 @@ Open http://127.0.0.1:8000.
 
 Use one Uvicorn process for this POC. No authentication, database, cloud service, or network connection is required.
 
+## Docker deployment
+
+Clark includes a production `Dockerfile` and `compose.yaml`. The Compose service:
+
+- starts automatically after Docker or the server restarts;
+- runs one Uvicorn process as an unprivileged user;
+- checks `/healthz` to confirm the application is responding;
+- stores voucher records and generated PDFs outside the container.
+
+### First deployment on the server
+
+Clone the repository, then create the persistent host directories. Clark runs inside the container as UID and GID `10001`, so the directories must be writable by that account:
+
+```sh
+cd clark
+mkdir -p data output/pdf
+sudo chown -R 10001:10001 data output/pdf
+docker compose up -d --build
+```
+
+Check the deployment:
+
+```sh
+docker compose ps
+curl --fail http://127.0.0.1:8000/healthz
+docker compose logs --tail=100 clark
+```
+
+Open `http://SERVER-LAN-IP:8000` from a computer on the same network. Clark has no authentication, so do not forward this port through the router or otherwise expose it directly to the internet.
+
+The persistent paths are:
+
+| Server path | Container path | Contents |
+| --- | --- | --- |
+| `./data` | `/app/data` | Saved voucher records |
+| `./output/pdf` | `/app/output/pdf` | Generated PDF revisions |
+
+Existing records and PDFs are intentionally ignored by Git. Copy these two directories to the server separately if migrating an existing Clark installation.
+
+### Updates
+
+After pulling a new version:
+
+```sh
+git pull
+docker compose up -d --build
+docker compose ps
+```
+
+Recreating the container does not remove either persistent host directory.
+
+### Backup and restore
+
+Back up both `data/` and `output/pdf/`. For a simple consistent offline backup, briefly stop Clark, copy the directories to another device, and start it again:
+
+```sh
+docker compose stop
+# Copy data/ and output/pdf/ to the backup destination.
+docker compose start
+```
+
+To restore, stop Clark, replace both directories from the same backup set, restore ownership with `sudo chown -R 10001:10001 data output/pdf`, and start the service.
+
+### Local verification
+
+Install the development-only test dependencies and run the smoke tests:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python -m pytest
+```
+
+Validate the Compose file without starting it:
+
+```sh
+docker compose config --quiet
+```
+
 ## Staff workflow
 
 ### Create or edit a voucher

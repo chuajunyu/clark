@@ -24,6 +24,12 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 
+@app.get("/healthz", include_in_schema=False)
+def healthcheck():
+    """Report whether the web process is ready to serve requests."""
+    return {"status": "ok"}
+
+
 def blank_voucher() -> dict:
     return normalize_data({
         "id": "", "voucher_number": "", "voucher_date": "", "payee": "",

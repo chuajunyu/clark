@@ -1,4 +1,7 @@
 tmp/
 __pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
 data/vouchers.json
 output/pdf/

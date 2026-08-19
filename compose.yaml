@@ -1,0 +1,24 @@
+services:
+  clark:
+    build:
+      context: .
+    restart: unless-stopped
+    init: true
+    environment:
+      TZ: Asia/Singapore
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./output/pdf:/app/output/pdf
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    stop_grace_period: 20s
