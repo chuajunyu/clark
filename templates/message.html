@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - Clark{% endblock %}
+{% block content %}
+<main class="message-panel">
+  <p class="eyebrow">Clark</p><h1>{{ title }}</h1><p>{{ message }}</p>
+  <a class="primary button-link" href="{{ back_url or '/vouchers' }}">{{ back_label or 'Go to saved vouchers' }}</a>
+</main>
+{% endblock %}
+

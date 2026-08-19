@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - Clark{% endblock %}
+{% block content %}
+<main class="preview-shell">
+  <section class="preview-toolbar">
+    <div><p class="eyebrow">Ready to print</p><h1>{{ title }}</h1><p class="preview-subtitle">{{ subtitle }}</p></div>
+    <div class="preview-actions">
+      <a class="secondary button-link" href="{{ edit_url }}">Back</a>
+      <a class="secondary button-link" href="/download/{{ pdf_name }}">Download PDF</a>
+      <button class="primary" id="open-print-controls" type="button">Open print controls</button>
+    </div>
+  </section>
+  <div class="print-instruction" role="note">
+    {% if is_direct %}
+    <strong>Use pre-printed payment voucher paper and select A5 landscape.</strong>
+    This PDF already uses an A5 page; keep the default scale or select <strong>100%</strong> if the option is shown.
+    {% else %}
+    <strong>Use A4 portrait paper.</strong>
+    Select <strong>Actual size / 100%</strong> and turn off <strong>Fit to page</strong> before printing.
+    {% endif %}
+  </div>
+  <div class="pdf-preview-wrap">
+    <iframe id="pdf-frame" title="PDF print preview" src="/pdf/{{ pdf_name }}"></iframe>
+  </div>
+  <div class="preview-links">
+    <a id="open-pdf-fallback" href="/pdf/{{ pdf_name }}" target="_blank">Open printable PDF in a new tab</a>
+    {% if archive_name %}<a href="/pdf/{{ archive_name }}" target="_blank">View complete archive copy</a>{% endif %}
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/print-preview.js" defer></script>{% endblock %}

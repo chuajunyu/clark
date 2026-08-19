@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Saved vouchers - Clark{% endblock %}
+{% block content %}
+<main class="page-shell">
+  <div class="page-heading">
+    <div><p class="eyebrow">Local records</p><h1>Saved vouchers</h1></div>
+    <a class="primary button-link" href="/vouchers/new">Create new voucher</a>
+  </div>
+  <form class="search-bar" method="get" action="/vouchers">
+    <label for="voucher-search">Search by voucher number or payee</label>
+    <div><input id="voucher-search" name="q" value="{{ query }}"><button class="secondary" type="submit">Search</button></div>
+  </form>
+  {% if vouchers %}
+  <div class="record-table-wrap">
+    <table class="record-table">
+      <thead><tr><th>Voucher</th><th>Payee</th><th>Date</th><th class="number-column">Total</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for voucher in vouchers %}
+        <tr>
+          <td><strong>{{ voucher.voucher_number or "Untitled voucher" }}</strong><small>Saved {{ voucher.updated_at[:16].replace('T', ' ') }}</small></td>
+          <td>{{ voucher.payee or "-" }}</td>
+          <td>{{ voucher.voucher_date or "-" }}</td>
+          <td class="number-column">{{ ('$' ~ voucher.amount) if voucher.has_amount else '-' }}</td>
+          <td><span class="record-status">{{ "Printed" if voucher.print_history else "Draft" }}</span>{% if voucher.print_history %}<small>Revision {{ voucher.print_history[-1].revision }}</small>{% endif %}</td>
+          <td class="record-actions">
+            <a href="/vouchers/{{ voucher.id }}/view">View</a>
+            {% if voucher.print_history %}<a href="/vouchers/{{ voucher.id }}/prints/{{ voucher.print_history[-1].revision }}">Reprint</a>{% endif %}
+            <button type="button" class="link-button add-saved-to-tray" data-voucher-id="{{ voucher.id }}">Add to A4 tray</button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <section class="empty-state"><h2>No saved vouchers found</h2><p>Create a voucher, save it, and it will appear here.</p><a href="/vouchers/new">Create the first voucher</a></section>
+  {% endif %}
+  <div id="page-toast" class="page-toast" role="status" hidden></div>
+</main>
+{% endblock %}

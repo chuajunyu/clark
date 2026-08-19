@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Clark{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% set current_path = request.url.path %}
+  <header class="app-header">
+    <div class="app-header-inner">
+      <a class="brand-link" href="/vouchers/new" aria-label="Clark home">
+        <span class="brand-mark" aria-hidden="true">C</span>
+        <span class="brand-copy"><strong class="brand">Clark</strong><span class="brand-note">Payment voucher register</span></span>
+      </a>
+      <nav class="workspace-nav" aria-label="Main navigation">
+        <a class="workspace-link new-link{% if current_path == '/vouchers/new' %} is-active{% endif %}" href="/vouchers/new">
+          <span class="workspace-link-title">New voucher</span>
+          <span class="workspace-link-note">Start a blank form</span>
+        </a>
+        <a class="workspace-link{% if current_path == '/vouchers' or current_path.endswith('/view') %} is-active{% endif %}" href="/vouchers">
+          <span class="workspace-link-title">Saved vouchers</span>
+          <span class="workspace-link-note">View, update or reprint</span>
+        </a>
+        <a class="workspace-link{% if current_path == '/tray' %} is-active{% endif %}" href="/tray">
+          <span class="workspace-link-title">A4 print tray <span id="nav-tray-count" class="nav-count">0</span></span>
+          <span class="workspace-link-note">Print two per page</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+  {% block content %}{% endblock %}
+  <script src="/static/app.js" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

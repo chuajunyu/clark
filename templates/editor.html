@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ "New voucher" if is_new else "View voucher" }} - Clark{% endblock %}
+{% block content %}
+<main class="workspace editor-workspace" data-tray-add-id="{{ tray_add_id }}">
+  <section class="voucher-area" aria-labelledby="editor-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">{{ "New payment voucher" if is_new else "Saved payment voucher" }}</p>
+        <h1 id="editor-title">{{ "Fill in the payment voucher" if is_new else "View payment voucher" }}</h1>
+      </div>
+      <div class="save-state" id="save-state" data-initial-state="{{ 'new' if is_new else 'saved' }}">
+        <span class="status-dot"></span>
+        <span class="status-text">{{ "Not saved" if is_new else "Saved" }}</span>
+      </div>
+    </div>
+
+    {% if message %}<div class="success-banner" role="status">{{ message }}</div>{% endif %}
+
+    <div class="voucher-stack">
+      <form id="voucher-form" class="voucher-paper" action="/vouchers/action" method="post">
+        <input type="hidden" name="voucher_id" value="{{ voucher.id }}">
+        <input type="hidden" name="record_version" value="{{ voucher.record_version }}">
+
+        <div class="voucher-heading">
+          <div class="voucher-title">PAYMENT VOUCHER</div>
+          <div class="voucher-meta">
+            <label><span>Voucher No :</span><input name="voucher_number" value="{{ voucher.voucher_number }}" autocomplete="off"></label>
+            <label><span>Date :</span><input type="date" name="voucher_date" value="{{ voucher.voucher_date }}"></label>
+          </div>
+        </div>
+
+        <label class="payee-row">
+          <span>PAY TO</span>
+          <input name="payee" value="{{ voucher.payee }}" autocomplete="off">
+        </label>
+
+        <div class="voucher-table">
+          <div class="table-heading description-heading">D E S C R I P T I O N</div>
+          <div class="table-heading amount-heading">A M O U N T</div>
+          {% for line in voucher.line_items %}
+          <label class="description-cell">
+            <span class="sr-only">Description row {{ loop.index }}</span>
+            <input class="line-description" name="description_{{ loop.index }}" value="{{ line.description }}" autocomplete="off">
+          </label>
+          <label class="amount-cell">
+            <span class="currency line-currency{% if not line.amount %} is-hidden{% endif %}">$</span>
+            <span class="sr-only">Amount row {{ loop.index }}</span>
+            <input class="line-amount" type="text" inputmode="decimal" name="amount_{{ loop.index }}" value="{{ line.amount }}" autocomplete="off">
+          </label>
+          {% endfor %}
+        </div>
+
+        <div class="payment-row">
+          <label class="account-cell"><span>A/c</span><input name="account_code" value="{{ voucher.account_code }}" autocomplete="off"></label>
+          <label class="method-cell"><span>Cash/Cheque/Online</span><input name="payment_method" value="{{ voucher.payment_method }}" autocomplete="off"></label>
+          <div class="total-cell"><span class="currency total-currency{% if not voucher.amount or voucher.amount == '0.00' %} is-hidden{% endif %}">$</span><output id="amount-total">{{ voucher.amount if voucher.amount != '0.00' else '' }}</output></div>
+        </div>
+
+        <div class="sum-row">
+          <span>The Sum of Dollars :</span>
+          <output id="amount-words"></output>
+        </div>
+
+        <div class="signature-row">
+          <label><span>Payment Approved by :</span><input name="approved_by" value="{{ voucher.approved_by }}" autocomplete="off"></label>
+          <label><span>Received by :</span><input name="received_by" value="{{ voucher.received_by }}" autocomplete="off"></label>
+        </div>
+      </form>
+    </div>
+
+    <div id="amount-warning" class="input-warning" role="status" hidden></div>
+    <div class="voucher-actions action-bar">
+      <button class="secondary" type="submit" name="action" value="save" form="voucher-form">Save draft</button>
+      <button class="primary" type="submit" name="action" value="direct" form="voucher-form">Preview &amp; print on voucher paper</button>
+      <button class="secondary" type="submit" name="action" value="tray" form="voucher-form">Save &amp; add to A4 tray</button>
+    </div>
+    <p class="print-hint">Nothing is required. You can save or print a partially completed voucher and return to it later.</p>
+  </section>
+
+  <aside class="help-panel">
+    <p class="eyebrow">Quick guide</p>
+    <h2>What would you like to do?</h2>
+    <ol class="help-steps">
+      <li><strong>Save draft</strong><span>Keep this voucher and continue later.</span></li>
+      <li><strong>Print on voucher paper</strong><span>Preview values positioned for the pre-printed form.</span></li>
+      <li><strong>Add to A4 tray</strong><span>Collect saved vouchers, then print two per A4 sheet.</span></li>
+    </ol>
+    {% if voucher.print_history %}
+    <div class="history-summary">
+      <strong>Previously printed</strong>
+      <span>{{ voucher.print_history|length }} revision{{ '' if voucher.print_history|length == 1 else 's' }}</span>
+      <a href="/vouchers/{{ voucher.id }}/prints/{{ voucher.print_history[-1].revision }}">Open latest preview</a>
+    </div>
+    {% endif %}
+  </aside>
+</main>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}A4 print tray - Clark{% endblock %}
+{% block content %}
+<main class="page-shell tray-page" id="a4-tray-page">
+  <div class="page-heading">
+    <div><p class="eyebrow">Two vouchers per A4 page</p><h1>A4 print tray</h1></div>
+    <a class="secondary button-link" href="/vouchers">Choose saved vouchers</a>
+  </div>
+  <div class="instruction-banner"><strong>Your tray is temporary.</strong> It is kept only in this browser tab. Saved vouchers remain safely available under Saved vouchers.</div>
+  <div id="full-tray-list" class="full-tray-list"></div>
+  <section id="full-tray-empty" class="empty-state">
+    <h2>The A4 tray is empty</h2>
+    <p>Open Saved vouchers and choose “Add to A4 tray”, or add the voucher while editing it.</p>
+    <a href="/vouchers">Choose saved vouchers</a>
+  </section>
+  <form id="a4-print-form" action="/print/a4" method="post" class="tray-print-bar">
+    <input id="voucher-ids-json" type="hidden" name="voucher_ids_json">
+    <div><strong id="tray-summary">0 vouchers selected</strong><span>Clark will place two landscape vouchers on each A4 page.</span></div>
+    <button id="clear-tray" class="secondary" type="button">Clear tray</button>
+    <button id="preview-a4" class="primary" type="submit" disabled>Preview A4 sheet</button>
+  </form>
+</main>
+{% endblock %}
+
