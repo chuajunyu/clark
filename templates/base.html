@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Clark{% endblock %}</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v={{ asset_version('favicon.svg') }}">
+  <link rel="stylesheet" href="/static/style.css?v={{ asset_version('style.css') }}">
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -32,7 +33,7 @@
     </div>
   </header>
   {% block content %}{% endblock %}
-  <script src="/static/app.js" defer></script>
+  <script src="/static/app.js?v={{ asset_version('app.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -211,3 +211,11 @@ button { border: 0; border-radius: 7px; cursor: pointer; font-weight: 750; }
   .full-tray-item { grid-template-columns: 34px 1fr auto; }
   .full-tray-item > a { display: none; }
 }
+
+/* Keep editor feedback from moving the voucher or its action buttons. */
+.editor-workspace .section-heading { min-height: 64px; }
+.editor-workspace .save-state { min-width: 150px; justify-content: center; }
+.help-panel .voucher-actions { display: flex; flex-direction: column; margin-top: 20px; }
+.help-panel .voucher-actions button { width: 100%; }
+.help-panel .editor-message { min-height: 3em; margin-top: 12px; color: var(--accent-dark); font-size: 13px; }
+.help-panel .input-warning { position: fixed; bottom: 16px; right: 16px; z-index: 10; max-width: min(360px, calc(100vw - 32px)); margin: 0; }

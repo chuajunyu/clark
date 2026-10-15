@@ -19,7 +19,7 @@
         <tr>
           <td><strong>{{ voucher.voucher_number or "Untitled voucher" }}</strong><small>Saved {{ voucher.updated_at[:16].replace('T', ' ') }}</small></td>
           <td>{{ voucher.payee or "-" }}</td>
-          <td>{{ voucher.voucher_date or "-" }}</td>
+          <td>{{ (voucher.voucher_date | voucher_date) or "-" }}</td>
           <td class="number-column">{{ ('$' ~ voucher.amount) if voucher.has_amount else '-' }}</td>
           <td><span class="record-status">{{ "Printed" if voucher.print_history else "Draft" }}</span>{% if voucher.print_history %}<small>Revision {{ voucher.print_history[-1].revision }}</small>{% endif %}</td>
           <td class="record-actions">

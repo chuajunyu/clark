@@ -1,4 +1,5 @@
 from datetime import datetime
+from hashlib import sha256
 import json
 from pathlib import Path
 from uuid import uuid4
@@ -15,12 +16,16 @@ from storage import (
     list_vouchers,
     save_voucher,
 )
-from voucher_pdf import OUTPUT_DIR, make_a4_pdf, make_direct_revision, normalize_data
+from voucher_pdf import OUTPUT_DIR, make_a4_pdf, make_direct_revision, normalize_data, format_voucher_date
 
 
 BASE_DIR = Path(__file__).parent
 app = FastAPI(title="Clark")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+templates.env.filters["voucher_date"] = format_voucher_date
+templates.env.globals["asset_version"] = lambda name: sha256(
+    (BASE_DIR / "static" / name).read_bytes()
+).hexdigest()[:12]
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 
@@ -39,6 +44,14 @@ def blank_voucher() -> dict:
     })
 
 
+def parse_voucher_date(value: str) -> str:
+    value = value.strip()
+    try:
+        return datetime.strptime(value, "%d.%m.%Y").strftime("%Y-%m-%d")
+    except ValueError:
+        return value
+
+
 def voucher_values(form) -> dict:
     line_items = [
         {"description": str(form.get(f"description_{index}", "")), "amount": str(form.get(f"amount_{index}", ""))}
@@ -46,7 +59,7 @@ def voucher_values(form) -> dict:
     ]
     return normalize_data({
         "voucher_number": str(form.get("voucher_number", "")),
-        "voucher_date": str(form.get("voucher_date", "")),
+        "voucher_date": parse_voucher_date(str(form.get("voucher_date", ""))),
         "payee": str(form.get("payee", "")),
         "line_items": line_items,
         "payment_method": str(form.get("payment_method", "")),
@@ -184,7 +197,7 @@ def voucher_summaries(ids: str = ""):
     vouchers = get_vouchers([value for value in ids.split(",") if value])
     return JSONResponse({"vouchers": [{
         "id": voucher["id"], "voucher_number": voucher.get("voucher_number", ""),
-        "voucher_date": voucher.get("voucher_date", ""), "payee": voucher.get("payee", ""),
+        "voucher_date": format_voucher_date(voucher.get("voucher_date", "")), "payee": voucher.get("payee", ""),
         "amount": voucher.get("amount", "0.00"),
     } for voucher in vouchers]})
 

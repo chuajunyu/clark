@@ -7,7 +7,7 @@ services:
     environment:
       TZ: Asia/Singapore
     ports:
-      - "8000:8000"
+      - "192.168.1.125:8000:8000"
     volumes:
       - ./data:/app/data
       - ./output/pdf:/app/output/pdf

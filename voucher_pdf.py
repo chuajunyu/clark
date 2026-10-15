@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 import os
 from pathlib import Path
@@ -28,6 +29,14 @@ def clean_filename(value: str) -> str:
     return safe.strip("_") or "voucher"
 
 
+def format_voucher_date(value: str) -> str:
+    value = str(value or "").strip()
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").strftime("%d.%m.%Y")
+    except ValueError:
+        return value
+
+
 def normalize_data(data: dict) -> dict:
     normalized = dict(data)
     raw_items = normalized.get("line_items")
@@ -42,6 +51,15 @@ def normalize_data(data: dict) -> dict:
             })
     while len(items) < 7:
         items.append({"description": "", "amount": ""})
+    for item in items:
+        if not item["amount"]:
+            continue
+        try:
+            amount = Decimal(item["amount"].replace(",", ""))
+            if amount.is_finite():
+                item["amount"] = f"{amount:.2f}"
+        except InvalidOperation:
+            pass
     total = Decimal("0")
     invalid_amounts = []
     has_amount = False
@@ -197,9 +215,9 @@ def draw_values(pdf: canvas.Canvas, geometry: VoucherGeometry, data: dict) -> No
     divider = geometry.x("description_amount_divider_x_mm")
     pdf.setFillColor(colors.black)
     pdf.setFont(font, size)
-    pdf.drawString(geometry.x("voucher_value_x_mm"), geometry.y("voucher_y_mm"), fit_text(data["voucher_number"], font, size, right - geometry.x("voucher_value_x_mm")))
-    pdf.drawString(geometry.x("date_value_x_mm"), geometry.y("date_y_mm"), fit_text(data["voucher_date"], font, size, right - geometry.x("date_value_x_mm")))
-    pdf.drawString(geometry.x("pay_value_x_mm"), geometry.y("pay_y_mm"), fit_text(data["payee"], font, size, right - geometry.x("pay_value_x_mm")))
+    pdf.drawString(geometry.x("voucher_value_x_mm"), geometry.y("voucher_value_y_mm"), fit_text(data["voucher_number"], font, size, right - geometry.x("voucher_value_x_mm")))
+    pdf.drawString(geometry.x("date_value_x_mm"), geometry.y("date_value_y_mm"), fit_text(format_voucher_date(data["voucher_date"]), font, size, right - geometry.x("date_value_x_mm")))
+    pdf.drawString(geometry.x("pay_value_x_mm"), geometry.y("pay_value_y_mm"), fit_text(data["payee"], font, size, right - geometry.x("pay_value_x_mm")))
     description_width = divider - geometry.x("description_x_mm") - 4
     for index, item in enumerate(data["line_items"][:layout["description_rows"]]):
         top = layout["description_first_y_mm"] + index * layout["description_line_gap_mm"]

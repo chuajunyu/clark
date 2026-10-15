@@ -14,7 +14,6 @@
       </div>
     </div>
 
-    {% if message %}<div class="success-banner" role="status">{{ message }}</div>{% endif %}
 
     <div class="voucher-stack">
       <form id="voucher-form" class="voucher-paper" action="/vouchers/action" method="post">
@@ -25,7 +24,7 @@
           <div class="voucher-title">PAYMENT VOUCHER</div>
           <div class="voucher-meta">
             <label><span>Voucher No :</span><input name="voucher_number" value="{{ voucher.voucher_number }}" autocomplete="off"></label>
-            <label><span>Date :</span><input type="date" name="voucher_date" value="{{ voucher.voucher_date }}"></label>
+            <label><span>Date :</span><input type="text" name="voucher_date" value="{{ voucher.voucher_date | voucher_date }}" placeholder="DD.MM.YYYY" inputmode="numeric" pattern="[0-9]{2}\.[0-9]{2}\.[0-9]{4}" title="Enter a date as DD.MM.YYYY" maxlength="10" autocomplete="off"></label>
           </div>
         </div>
 
@@ -68,13 +67,7 @@
       </form>
     </div>
 
-    <div id="amount-warning" class="input-warning" role="status" hidden></div>
-    <div class="voucher-actions action-bar">
-      <button class="secondary" type="submit" name="action" value="save" form="voucher-form">Save draft</button>
-      <button class="primary" type="submit" name="action" value="direct" form="voucher-form">Preview &amp; print on voucher paper</button>
-      <button class="secondary" type="submit" name="action" value="tray" form="voucher-form">Save &amp; add to A4 tray</button>
-    </div>
-    <p class="print-hint">Nothing is required. You can save or print a partially completed voucher and return to it later.</p>
+
   </section>
 
   <aside class="help-panel">
@@ -85,6 +78,14 @@
       <li><strong>Print on voucher paper</strong><span>Preview values positioned for the pre-printed form.</span></li>
       <li><strong>Add to A4 tray</strong><span>Collect saved vouchers, then print two per A4 sheet.</span></li>
     </ol>
+    <div id="amount-warning" class="input-warning" role="status" hidden></div>
+    <div class="voucher-actions action-bar">
+      <button class="secondary" type="submit" name="action" value="save" form="voucher-form">Save draft</button>
+      <button class="primary" type="submit" name="action" value="direct" form="voucher-form">Preview &amp; print on voucher paper</button>
+      <button class="secondary" type="submit" name="action" value="tray" form="voucher-form">Save &amp; add to A4 tray</button>
+    </div>
+    <p class="print-hint">Nothing is required. You can save or print a partially completed voucher and return to it later.</p>
+    <div class="editor-message" role="status">{{ message }}</div>
     {% if voucher.print_history %}
     <div class="history-summary">
       <strong>Previously printed</strong>

@@ -92,11 +92,57 @@ function initialiseEditor() {
     }
   }
 
+  function formatAmount(input, markDirty = true) {
+    const raw = input.value.trim();
+    if (!raw) return;
+    const amount = Number(raw.replaceAll(",", ""));
+    if (!Number.isFinite(amount)) return;
+    const formatted = amount.toFixed(2);
+    if (input.value !== formatted) {
+      input.value = formatted;
+      if (markDirty) setDirty();
+    }
+  }
+
+  form.addEventListener("focusout", (event) => {
+    if (!event.target.matches(".line-amount")) return;
+    formatAmount(event.target);
+    updateAmountPreview();
+  });
+  form.querySelectorAll(".line-amount").forEach((input) => formatAmount(input, false));
+
+  // Native Tab order and Enter both follow the fields in document order.
+  form.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.isComposing || event.altKey || event.ctrlKey || event.metaKey) return;
+    const fields = [...form.querySelectorAll("input:not([type='hidden']):not(:disabled):not([readonly])")];
+    const index = fields.indexOf(event.target);
+    if (index < 0) return;
+    event.preventDefault();
+    const next = fields[index + (event.shiftKey ? -1 : 1)];
+    if (next) next.focus();
+    else if (!event.shiftKey) document.querySelector("button[form='voucher-form'][value='save']")?.focus();
+  });
+
+  const dateInput = form.elements.namedItem("voucher_date");
+  dateInput.addEventListener("input", () => dateInput.setCustomValidity(""));
+  dateInput.addEventListener("change", () => {
+    const value = dateInput.value.trim();
+    if (!value || !/^\d{2}\.\d{2}\.\d{4}$/.test(value)) return;
+    const [day, month, year] = value.split(".").map(Number);
+    const date = new Date(0);
+    date.setFullYear(year, month - 1, day);
+    dateInput.setCustomValidity(date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+      ? "" : "Enter a valid date as DD.MM.YYYY.");
+  });
+
   form.addEventListener("input", () => {
     setDirty();
     updateAmountPreview();
   });
-  form.addEventListener("submit", () => { submitting = true; });
+  form.addEventListener("submit", () => {
+    form.querySelectorAll(".line-amount").forEach((input) => formatAmount(input));
+    submitting = true;
+  });
   window.addEventListener("beforeunload", (event) => {
     if (!dirty || submitting) return;
     event.preventDefault();
